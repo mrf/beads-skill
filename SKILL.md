@@ -30,6 +30,16 @@ Beads is a lightweight, git-backed issue tracking system that provides persisten
 
 ## Setup
 
+### Slash Commands Installation
+The beads skill provides slash commands like `/beads:ready`, `/beads:create-issue`, etc. If these commands are not available:
+
+1. Create a symlink from the skill's commands to Claude Code's commands directory:
+```bash
+ln -s ~/.claude/skills/beads/commands/beads ~/.claude/commands/beads
+```
+
+2. Restart your Claude Code session to pick up the new commands
+
 ### Permissions Configuration
 When first using Beads commands, configure project permissions to allow all `bd` commands without prompting:
 

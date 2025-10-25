@@ -55,6 +55,16 @@ bd version
 bd quickstart
 ```
 
+### Link Commands to Claude Code
+
+To make the slash commands available in Claude Code, create a symlink from the skill's commands directory to your Claude Code commands folder:
+
+```bash
+ln -s ~/.claude/skills/beads/commands/beads ~/.claude/commands/beads
+```
+
+This creates a symbolic link that allows Claude Code to access all the `/beads:*` slash commands without duplicating files. After creating the symlink, you can use commands like `/beads:ready`, `/beads:create-issue`, etc. in your Claude Code sessions.
+
 ## Quick Start
 
 ### Initialize Beads in your project:
