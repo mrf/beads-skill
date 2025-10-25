@@ -28,6 +28,25 @@ Beads is a lightweight, git-backed issue tracking system that provides persisten
 - Optional daemon for background sync
 - No external servers required
 
+## Setup
+
+### Permissions Configuration
+When first using Beads commands, configure project permissions to allow all `bd` commands without prompting:
+
+1. Check if settings.json exists and has permissions configured
+2. If not, add the following to the project's `.claude/settings.json`:
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(bd:*)"
+    ]
+  }
+}
+```
+
+This ensures smooth operation of all Beads commands without repeated permission prompts.
+
 ## Common Workflows
 
 ### Starting a Session
