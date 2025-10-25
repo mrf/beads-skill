@@ -18,6 +18,7 @@ Installed as Claude Code slash commands:
 - `/beads:finish-work` - Complete issues and check newly unblocked work
 - `/beads:status` - Show project status dashboard
 - `/beads:deps` - Manage issue dependencies
+- `/beads:pm` - **Project Manager** - Comprehensive audit ensuring beads-reality alignment
 
 ### Scripts
 Located in `scripts/`:
@@ -96,6 +97,24 @@ The skill automatically helps Claude Code:
 - Identify ready work when starting a session
 - File bugs found during development
 - Plan complex features with proper task breakdown
+
+#### Beads Project Manager
+
+The `/beads:pm` command activates a detail-oriented project manager agent that:
+- **Enforces alignment** between beads issues and actual work state
+- **Validates priorities** ensuring highest priority work is tackled first
+- **Captures all work** by finding untracked todos, commits, and code comments
+- **Syncs TodoWrite** ensuring every todo has a corresponding beads issue
+- **Maintains discipline** by preventing work outside of beads tracking
+
+Use it for:
+- Regular project health checks
+- Ensuring team works on what matters most
+- Finding and filing untracked work
+- Validating TodoWrite and beads are in sync
+- Getting a comprehensive status overview
+
+See `AGENT_PM.md` for the complete project manager specification.
 
 ### Command Reference
 
