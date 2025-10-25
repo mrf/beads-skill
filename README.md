@@ -66,6 +66,20 @@ ln -s ~/.claude/skills/beads/commands/beads ~/.claude/commands/beads
 
 This creates a symbolic link that allows Claude Code to access all the `/beads:*` slash commands without duplicating files. After creating the symlink, you can use commands like `/beads:ready`, `/beads:create-issue`, etc. in your Claude Code sessions.
 
+### Link Beads PM Agent
+
+To make the Beads Project Manager agent available in Claude Code, create a symlink to the agent definition:
+
+```bash
+# Create agents directory if it doesn't exist
+mkdir -p ~/.claude/agents
+
+# Symlink the Beads PM agent
+ln -s ~/.claude/skills/beads/AGENT_PM.md ~/.claude/agents/AGENT_PM.md
+```
+
+This allows Claude Code's Task tool to access the `beads-pm` agent type for comprehensive project management and beads-reality alignment checks. The agent can be invoked directly through the Task tool with `subagent_type: "beads-pm"` or via the `/beads:pm` slash command.
+
 ## Quick Start
 
 ### Initialize Beads in your project:
