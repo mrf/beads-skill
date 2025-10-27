@@ -1,6 +1,6 @@
 ---
 description: Show Beads project status overview
-allowed-tools: Bash(bd *)
+allowed-tools: Bash(bd:*)
 ---
 
 Show a comprehensive overview of the Beads project status.

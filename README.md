@@ -6,10 +6,12 @@ This skill enables Claude Code to work effectively with [Beads](https://github.c
 
 ### Skill
 - `SKILL.md` - Complete reference for Beads commands and agent integration patterns
+- `PERMISSIONS.md` - Guide for setting up Claude Code permissions for bd commands
 
 ### Slash Commands
 Installed as Claude Code slash commands:
 
+- `/beads:init` - **Initialize beads with permissions** - Sets up beads and configures Claude Code permissions
 - `/beads:ready` - Show ready issues (no blockers)
 - `/beads:create-issue` - Create a new issue with prompts
 - `/beads:show` - Display issue details
@@ -23,7 +25,8 @@ Installed as Claude Code slash commands:
 ### Scripts
 Located in `scripts/`:
 
-- `init-project.sh` - Initialize Beads in a new project
+- `setup-permissions.sh` - Configure Claude Code permissions for bd commands
+- `init-project.sh` - Initialize Beads in a new project with starter issues
 - `daily-standup.sh` - Generate daily standup report
 - `file-bug.sh` - Quick bug filing helper
 
@@ -83,14 +86,24 @@ This allows Claude Code's Task tool to access the `beads-pm` agent type for comp
 ## Quick Start
 
 ### Initialize Beads in your project:
+
+**Option 1: Use the Claude Code slash command (Recommended)**
+```
+/beads:init
+```
+This will initialize beads AND automatically configure permissions in `.claude/settings.local.json`.
+
+**Option 2: Use the command line**
 ```bash
 bd init
+~/.claude/skills/beads/scripts/setup-permissions.sh
 ```
 
-Or use the helper script that sets up starter issues:
+**Option 3: Use the project setup script**
 ```bash
 ~/.claude/skills/beads/scripts/init-project.sh
 ```
+Then run the permissions script to configure Claude Code.
 
 ### Use slash commands in Claude Code:
 ```
