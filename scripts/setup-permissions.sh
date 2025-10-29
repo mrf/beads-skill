@@ -21,7 +21,7 @@ if [ -f "$SETTINGS_FILE" ]; then
         echo "Permissions section already exists."
 
         # Check if bd permissions are already there
-        if echo "$EXISTING" | grep -q '"pattern": "bd:\\*"'; then
+        if echo "$EXISTING" | grep -q '"pattern": "bd:\\*"' && echo "$EXISTING" | grep -q '"pattern": "/beads:\\*"'; then
             echo "✓ Beads permissions already configured!"
             exit 0
         fi
@@ -30,20 +30,21 @@ if [ -f "$SETTINGS_FILE" ]; then
 
         # Use jq if available for proper JSON merging
         if command -v jq &> /dev/null; then
-            NEW_PERMS='[{"tool":"Bash","pattern":"bd:*"}]'
+            NEW_PERMS='[{"tool":"Bash","pattern":"bd:*"},{"tool":"SlashCommand","pattern":"/beads:*"}]'
             jq --argjson perms "$NEW_PERMS" '.permissions.allow += $perms | .permissions.allow |= unique_by(.pattern)' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
             mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
             echo "✓ Permissions updated successfully using jq!"
         else
-            echo "⚠️  jq not found. Please manually add this permission to $SETTINGS_FILE:"
+            echo "⚠️  jq not found. Please manually add these permissions to $SETTINGS_FILE:"
             echo '{"tool":"Bash","pattern":"bd:*"}'
+            echo '{"tool":"SlashCommand","pattern":"/beads:*"}'
             exit 1
         fi
     else
         echo "No permissions section found. Adding Beads permissions..."
 
         if command -v jq &> /dev/null; then
-            NEW_PERMS='{"permissions":{"allow":[{"tool":"Bash","pattern":"bd:*"}]}}'
+            NEW_PERMS='{"permissions":{"allow":[{"tool":"Bash","pattern":"bd:*"},{"tool":"SlashCommand","pattern":"/beads:*"}]}}'
             jq --argjson perms "$NEW_PERMS" '. + $perms' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
             mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
             echo "✓ Permissions added successfully!"
@@ -61,6 +62,10 @@ else
       {
         "tool": "Bash",
         "pattern": "bd:*"
+      },
+      {
+        "tool": "SlashCommand",
+        "pattern": "/beads:*"
       }
     ]
   }

@@ -30,6 +30,10 @@ Follow these steps:
          {
            "tool": "Bash",
            "pattern": "bd:*"
+         },
+         {
+           "tool": "SlashCommand",
+           "pattern": "/beads:*"
          }
        ]
      }

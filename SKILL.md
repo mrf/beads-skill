@@ -7,6 +7,29 @@ description: Work with Beads issue tracker for AI agent memory. Use when managin
 
 Beads is a lightweight, git-backed issue tracking system that provides persistent memory for AI coding agents across sessions.
 
+## CRITICAL: Initialization Check
+
+**BEFORE doing ANY beads operations, you MUST:**
+
+1. Check if beads is initialized in the current project:
+   ```bash
+   test -d .beads && echo "initialized" || echo "not initialized"
+   ```
+
+2. If the output is "not initialized", you MUST immediately run:
+   ```
+   /beads:init
+   ```
+
+   This will:
+   - Initialize the beads database in the project
+   - Set up proper permissions in `.claude/settings.local.json`
+   - Enable all beads commands to run without permission prompts
+
+3. Only after beads is confirmed initialized should you proceed with any `bd` commands.
+
+**DO NOT skip this check.** Running `bd` commands without initialization will fail.
+
 ## Core Capabilities
 
 ### Issue Management

@@ -28,6 +28,10 @@ If you prefer to set up permissions manually, add this to your project's `.claud
       {
         "tool": "Bash",
         "pattern": "bd:*"
+      },
+      {
+        "tool": "SlashCommand",
+        "pattern": "/beads:*"
       }
     ]
   }
@@ -52,6 +56,7 @@ This script will:
 
 The configuration allows Claude Code to run:
 - `bd:*` - All beads CLI commands (bd:list, bd:create, bd:show, etc.)
+- `/beads:*` - All beads slash commands (/beads:ready, /beads:status, /beads:plan, etc.)
 
 ## Per-Project vs Global
 
