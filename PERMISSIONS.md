@@ -25,14 +25,8 @@ If you prefer to set up permissions manually, add this to your project's `.claud
 {
   "permissions": {
     "allow": [
-      {
-        "tool": "Bash",
-        "pattern": "bd:*"
-      },
-      {
-        "tool": "SlashCommand",
-        "pattern": "/beads:*"
-      }
+      "Bash(bd :*)",
+      "SlashCommand(/beads:*)"
     ]
   }
 }

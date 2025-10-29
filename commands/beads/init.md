@@ -27,14 +27,8 @@ Follow these steps:
    {
      "permissions": {
        "allow": [
-         {
-           "tool": "Bash",
-           "pattern": "bd:*"
-         },
-         {
-           "tool": "SlashCommand",
-           "pattern": "/beads:*"
-         }
+         "Bash(bd :*)",
+         "SlashCommand(/beads:*)"
        ]
      }
    }
