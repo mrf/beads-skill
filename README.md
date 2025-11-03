@@ -2,6 +2,20 @@
 
 This skill enables Claude Code to work effectively with [Beads](https://github.com/steveyegge/beads), a lightweight git-backed issue tracker that provides persistent memory for AI coding agents.
 
+**Latest Beads Version:** v0.21.5 (November 2025)
+
+## Recent Updates
+
+### Major Changes (v0.20.1+)
+- **Hash-based Issue IDs**: Eliminates merge conflicts with collision-resistant IDs (bd-a1b2 vs bd-1)
+- **Hierarchical Child IDs**: Support for nested work breakdown (bd-a3f8e9.1, bd-a3f8e9.3.1)
+- **New Commands**: `bd migrate`, `bd doctor`, `bd daemons` for better management
+
+### Latest Release (v0.21.5)
+- Fixed double JSON encoding bug in daemon RPC calls
+- Normalized `--acceptance` flag behavior
+- Documentation for multiple bd binaries in PATH
+
 ## What's Included
 
 ### Skill
@@ -25,6 +39,7 @@ Installed as Claude Code slash commands:
 ### Scripts
 Located in `scripts/`:
 
+- `check-version.sh` - Check for beads updates and migration needs
 - `setup-permissions.sh` - Configure Claude Code permissions for bd commands
 - `init-project.sh` - Initialize Beads in a new project with starter issues
 - `daily-standup.sh` - Generate daily standup report
@@ -82,6 +97,38 @@ ln -s ~/.claude/skills/beads/AGENT_PM.md ~/.claude/agents/AGENT_PM.md
 ```
 
 This allows Claude Code's Task tool to access the `beads-pm` agent type for comprehensive project management and beads-reality alignment checks. The agent can be invoked directly through the Task tool with `subagent_type: "beads-pm"` or via the `/beads:pm` slash command.
+
+## Upgrading from Older Versions
+
+### Check Your Version
+```bash
+~/.claude/skills/beads/scripts/check-version.sh
+```
+
+This will:
+- Show your installed version vs. latest release
+- Alert if you need to migrate to hash-based IDs
+- Provide upgrade instructions
+
+### Migrating to Hash-Based IDs
+
+If you're upgrading from pre-v0.20.1 (sequential IDs like bd-1, bd-2):
+
+```bash
+# 1. Check what will be migrated
+bd migrate --inspect
+
+# 2. Test migration safety
+bd migrate --dry-run
+
+# 3. Perform migration (creates automatic backup)
+bd migrate
+
+# 4. Verify health
+bd doctor
+```
+
+**Important**: Hash-based IDs eliminate merge conflicts when multiple agents work concurrently. Migration is one-way but creates backups.
 
 ## Quick Start
 
@@ -166,14 +213,42 @@ bd dep add bd-5 bd-3         # bd-5 depends on bd-3
 bd dep tree bd-1             # Show tree
 ```
 
+## New Features Guide
+
+### Hash-Based Issue IDs
+- Auto-generated collision-resistant IDs: `bd-a1b2`, `bd-f14c`
+- Eliminates merge conflicts in multi-agent workflows
+- No more manual ID coordination
+
+### Hierarchical Child IDs
+```bash
+# Create epic
+EPIC=$(bd create "Epic: User Management" -t epic --json | jq -r '.id')
+
+# Create child tasks (auto-numbered)
+bd create "Add login form" --parent $EPIC  # Creates bd-a3f8.1
+bd create "Add signup form" --parent $EPIC # Creates bd-a3f8.2
+bd create "Add password reset" --parent $EPIC # Creates bd-a3f8.3
+```
+
+### Health Monitoring
+```bash
+# Regular health checks
+bd doctor              # Check setup and database
+bd daemons health      # Check daemon status
+bd migrate --inspect   # Check if migration needed
+```
+
 ## Tips
 
-1. **Use --json flag** for programmatic parsing
-2. **File issues liberally** during exploration - it's the agent's memory
-3. **Model dependencies carefully** - first arg depends on second arg in `bd dep add`
-4. **Check ready work** at session start - it's the agent's todo list
-5. **Use labels** for organization and filtering
-6. **Run daily standup** for project health overview
+1. **Check version regularly** - Run `~/.claude/skills/beads/scripts/check-version.sh`
+2. **Use --json flag** for programmatic parsing
+3. **File issues liberally** during exploration - it's the agent's memory
+4. **Use hierarchical IDs** for nested work breakdown (`--parent` flag)
+5. **Model dependencies carefully** - first arg depends on second arg in `bd dep add`
+6. **Check ready work** at session start - it's the agent's todo list
+7. **Use labels** for organization and filtering
+8. **Run health checks** periodically with `bd doctor`
 
 ## Resources
 
@@ -192,8 +267,12 @@ chmod +x ~/.claude/skills/beads/scripts/*.sh
 
 **Beads not found**: Ensure `bd` is in your PATH
 **Database not found**: Run `bd init` in project root
+**Old ID format**: Run `bd migrate` to upgrade to hash-based IDs
 **Sync conflicts**: Run any bd command to auto-merge
 **Performance issues**: Use `bd daemon &` for background sync
+**Health issues**: Run `bd doctor` to diagnose and fix
+**Daemon problems**: Run `bd daemons killall` to reset
+**Outdated version**: Run `~/.claude/skills/beads/scripts/check-version.sh`
 
 ## License
 

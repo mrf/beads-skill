@@ -34,6 +34,8 @@ Beads is a lightweight, git-backed issue tracking system that provides persisten
 
 ### Issue Management
 - Create, update, and close issues with rich metadata
+- **Hash-based IDs** (bd-a1b2, bd-f14c) eliminate merge conflicts and ID collisions
+- **Hierarchical child IDs** (bd-a3f8e9.1, bd-a3f8e9.3.1) support nested work breakdown
 - Track dependencies between issues (blocks, discovered-from, etc.)
 - Automatically identify "ready" work (issues with no open blockers)
 - Filter by status, priority, assignee, labels, and type
@@ -82,28 +84,36 @@ This ensures smooth operation of all Beads commands without repeated permission 
 
 ## Common Workflows
 
+### Understanding Issue IDs
+
+Beads uses **hash-based IDs** to eliminate merge conflicts:
+- Format: `bd-` followed by 4-6 hex characters (e.g., `bd-a1b2`, `bd-f14c`)
+- **Hierarchical IDs** for nested work: `bd-a3f8e9.1`, `bd-a3f8e9.2`, `bd-a3f8e9.3.1`
+- Auto-generated on creation - collision-resistant even with multiple agents
+- Migration from old sequential IDs: use `bd migrate`
+
 ### Starting a Session
 1. Check for ready work: `bd ready --json`
-2. Review issue details: `bd show bd-1`
-3. Assign to yourself: `bd update bd-1 -a @me`
-4. Mark in progress: `bd update bd-1 -s in_progress`
+2. Review issue details: `bd show bd-a1b2`
+3. Assign to yourself: `bd update bd-a1b2 -a @me`
+4. Mark in progress: `bd update bd-a1b2 -s in_progress`
 
 ### During Development
 1. Discover new issues: `bd create "Title" -d "Details" -t bug -p 1`
-2. Link dependencies: `bd dep add bd-2 bd-1` (bd-2 depends on bd-1)
-3. Update status: `bd update bd-1 -s blocked`
-4. Add labels: `bd label add bd-1 security`
+2. Link dependencies: `bd dep add bd-f3a1 bd-a1b2` (bd-f3a1 depends on bd-a1b2)
+3. Update status: `bd update bd-a1b2 -s blocked`
+4. Add labels: `bd label add bd-a1b2 security`
 
 ### Completing Work
-1. Mark done: `bd close bd-1`
+1. Mark done: `bd close bd-a1b2`
 2. Commit changes (includes Beads metadata in .beads/ directory)
 3. Check for newly unblocked work: `bd ready --json`
 
 ### Complex Task Planning
 1. Create parent epic: `bd create "Epic: Feature Name" -t epic -p 0`
-2. Create child tasks: `bd create "Subtask" -t task --deps "bd-1"`
-3. Add blockers: `bd dep add bd-3 bd-2` (bd-3 depends on bd-2)
-4. Visualize: `bd dep tree bd-1`
+2. Create child tasks with hierarchical IDs: `bd create "Subtask 1" -t task --parent bd-a3f8` (creates bd-a3f8.1)
+3. Add blockers: `bd dep add bd-f3a1 bd-a1b2` (bd-f3a1 depends on bd-a1b2)
+4. Visualize: `bd dep tree bd-a3f8`
 
 ## Best Practices for Agents
 
@@ -117,11 +127,15 @@ This ensures smooth operation of all Beads commands without repeated permission 
 When using `bd dep add [dependent] [dependency]`:
 - The first issue depends on the second
 - The second issue must be done before the first
-- Example: `bd dep add bd-5 bd-3` means "bd-5 depends on bd-3"
+- Example: `bd dep add bd-f3a1 bd-a1b2` means "bd-f3a1 depends on bd-a1b2"
 
 Use `--deps` flag during creation:
-- `bd create "Task" --deps "discovered-from:bd-20,blocks:bd-15"`
-- Or simple format: `--deps "bd-20,bd-15"`
+- `bd create "Task" --deps "discovered-from:bd-a3f8,blocks:bd-b2c4"`
+- Or simple format: `--deps "bd-a3f8,bd-b2c4"`
+
+Use `--parent` flag for hierarchical tasks:
+- `bd create "Subtask" --parent bd-a3f8` creates bd-a3f8.1
+- Supports up to 3 nesting levels (epic > feature > task)
 
 ### Working with Ready Issues
 ```bash
@@ -148,32 +162,38 @@ bd list --status open --json
 
 ### Core Commands
 
-#### Initialization
+#### Initialization & Maintenance
 ```bash
 bd init                    # Initialize bd in current project
 bd onboard                 # Interactive agent onboarding
 bd quickstart              # Interactive tutorial
+bd migrate                 # Migrate database to hash-based IDs
+bd migrate --inspect       # Preview migration without changes
+bd migrate --dry-run       # Test migration safety
+bd doctor                  # Health checks and validation
+bd doctor --fix            # Attempt automatic fixes
 ```
 
 #### Creating Issues
 ```bash
-bd create "Title"                              # Basic creation
+bd create "Title"                              # Basic creation (auto-generates hash ID)
 bd create "Title" -d "Description"             # With description
 bd create "Title" -t bug -p 1                  # Set type and priority
 bd create "Title" -a alice -l backend,urgent   # Assign and label
-bd create "Title" --deps "bd-20,bd-15"         # With dependencies
-bd create "Title" --id worker1-100             # Explicit ID
+bd create "Title" --deps "bd-a3f8,bd-b2c4"     # With dependencies
+bd create "Title" --parent bd-a3f8             # Create child issue (bd-a3f8.1)
 bd create -f plan.md                           # From markdown file
 bd create "Title" --json                       # JSON output
 ```
 
 **Types**: bug, feature, task, epic, chore
 **Priorities**: 0=critical, 1=high, 2=medium (default), 3=low, 4=backlog
+**Note**: Hash-based IDs are auto-generated; explicit IDs are no longer supported
 
 #### Viewing Issues
 ```bash
-bd show bd-1                           # Full details of one issue
-bd show bd-1 bd-2 bd-3                 # Multiple issues
+bd show bd-a1b2                        # Full details of one issue
+bd show bd-a1b2 bd-f3a1 bd-c5d6        # Multiple issues
 bd list                                # All issues
 bd list --status open                  # Filter by status
 bd list --priority 1                   # Filter by priority (0-4)
@@ -190,29 +210,29 @@ bd list --json                         # JSON output
 
 #### Updating Issues
 ```bash
-bd update bd-1 -s in_progress          # Change status
-bd update bd-1 -p 0                    # Change priority
-bd update bd-1 -a bob                  # Reassign
-bd update bd-1 --title "New Title"     # Update title
-bd update bd-1 -d "New description"    # Update description
-bd update bd-1 bd-2 bd-3 -s closed     # Bulk update
-bd update bd-1 --json                  # JSON output
+bd update bd-a1b2 -s in_progress       # Change status
+bd update bd-a1b2 -p 0                 # Change priority
+bd update bd-a1b2 -a bob               # Reassign
+bd update bd-a1b2 --title "New Title"  # Update title
+bd update bd-a1b2 -d "New description" # Update description
+bd update bd-a1b2 bd-f3a1 bd-c5d6 -s closed  # Bulk update
+bd update bd-a1b2 --json               # JSON output
 ```
 
 #### Closing Issues
 ```bash
-bd close bd-1                          # Close one issue
-bd close bd-1 bd-2 bd-3                # Close multiple
-bd close bd-1 --reason "Completed"     # With reason
-bd reopen bd-1                         # Reopen closed issue
+bd close bd-a1b2                       # Close one issue
+bd close bd-a1b2 bd-f3a1 bd-c5d6       # Close multiple
+bd close bd-a1b2 --reason "Completed"  # With reason
+bd reopen bd-a1b2                      # Reopen closed issue
 ```
 
 #### Dependencies
 ```bash
-bd dep add bd-5 bd-3                   # bd-5 depends on bd-3
-bd dep add bd-5 bd-3 --type blocks     # Explicit type
-bd dep remove bd-5 bd-3                # Remove dependency
-bd dep tree bd-2                       # Show dependency tree
+bd dep add bd-f3a1 bd-a1b2             # bd-f3a1 depends on bd-a1b2
+bd dep add bd-f3a1 bd-a1b2 --type blocks  # Explicit type
+bd dep remove bd-f3a1 bd-a1b2          # Remove dependency
+bd dep tree bd-a1b2                    # Show dependency tree
 bd dep cycles                          # Detect circular deps
 ```
 
@@ -231,25 +251,35 @@ bd stats                               # Statistics
 
 #### Labels
 ```bash
-bd label add bd-42 security            # Add single label
-bd label add bd-42 bug urgent          # Add multiple labels
-bd label remove bd-42 urgent           # Remove label
-bd label list bd-42                    # Labels on issue
+bd label add bd-a1b2 security          # Add single label
+bd label add bd-a1b2 bug urgent        # Add multiple labels
+bd label remove bd-a1b2 urgent         # Remove label
+bd label list bd-a1b2                  # Labels on issue
 bd label list-all                      # All labels with counts
+```
+
+#### Daemon Management
+```bash
+bd daemons                             # List all running daemons
+bd daemons health                      # Check daemon health status
+bd daemons stop <pid>                  # Stop specific daemon
+bd daemons logs <pid>                  # View daemon logs
+bd daemons killall                     # Stop all daemons
+bd daemon &                            # Start daemon in background
 ```
 
 #### Deletion
 ```bash
-bd delete bd-1                         # Preview mode
-bd delete bd-1 --force                 # Force delete
-bd delete bd-1 bd-2 bd-3 --force       # Batch delete
-bd delete bd-1 --cascade --force       # Delete with dependents
+bd delete bd-a1b2                      # Preview mode
+bd delete bd-a1b2 --force              # Force delete
+bd delete bd-a1b2 bd-f3a1 bd-c5d6 --force  # Batch delete
+bd delete bd-a1b2 --cascade --force    # Delete with dependents
 ```
 
 #### Comments
 ```bash
-bd comments bd-1                       # View comments
-bd comments bd-1 "Add comment"         # Add comment
+bd comments bd-a1b2                    # View comments
+bd comments bd-a1b2 "Add comment"      # Add comment
 ```
 
 #### Configuration
@@ -287,7 +317,7 @@ All commands support `--json` flag:
 
 ```json
 {
-  "id": "bd-42",
+  "id": "bd-a1b2",
   "title": "Implement OAuth login",
   "description": "Add OAuth 2.0 support",
   "status": "in_progress",
@@ -298,11 +328,13 @@ All commands support `--json` flag:
   "created_at": "2025-01-15T10:30:00Z",
   "updated_at": "2025-01-15T14:22:00Z",
   "closed_at": null,
-  "dependencies": ["bd-40"],
-  "dependents": ["bd-43", "bd-44"],
+  "dependencies": ["bd-c5d6"],
+  "dependents": ["bd-f3a1", "bd-d7e8"],
   "external_ref": "gh-123"
 }
 ```
+
+**Note**: IDs use hash-based format (bd-a1b2) instead of sequential numbers
 
 ## Agent Integration Patterns
 
@@ -325,22 +357,24 @@ bd create "Fix null pointer in auth handler" \
     -t bug \
     -p 1 \
     -l "bug,backend" \
-    --deps "discovered-from:bd-123" \
+    --deps "discovered-from:bd-a3f8" \
     --json
 ```
 
 ### Task Planning Template
 ```bash
-# Break down large feature
+# Break down large feature using hierarchical IDs
 EPIC_ID=$(bd create "Epic: User Dashboard" -t epic -p 1 --json | jq -r '.id')
-bd create "Design dashboard layout" -t task --deps "$EPIC_ID"
-bd create "Implement data fetching" -t task --deps "$EPIC_ID"
-bd create "Add filtering controls" -t task --deps "$EPIC_ID"
-bd create "Write integration tests" -t task --deps "$EPIC_ID"
+# Creates bd-a3f8.1, bd-a3f8.2, etc.
+bd create "Design dashboard layout" -t task --parent "$EPIC_ID"
+bd create "Implement data fetching" -t task --parent "$EPIC_ID"
+bd create "Add filtering controls" -t task --parent "$EPIC_ID"
+bd create "Write integration tests" -t task --parent "$EPIC_ID"
 
 # Add inter-task dependencies
-bd dep add bd-3 bd-2  # bd-3 depends on bd-2
-bd dep add bd-5 bd-3  # bd-5 depends on bd-3
+LAYOUT_ID=$(bd list --title "Design dashboard" --json | jq -r '.[0].id')
+DATA_ID=$(bd list --title "Implement data" --json | jq -r '.[0].id')
+bd dep add "$DATA_ID" "$LAYOUT_ID"  # Data fetching depends on layout
 ```
 
 ### Querying Ready Work
@@ -374,6 +408,41 @@ bd quickstart
 
 ## Troubleshooting
 
+### Migration from Sequential IDs
+If you have an old database with sequential IDs (bd-1, bd-2):
+```bash
+# Inspect migration plan
+bd migrate --inspect
+
+# Test migration safety
+bd migrate --dry-run
+
+# Perform migration (creates backup)
+bd migrate
+```
+
+### Health Checks
+Run diagnostic checks for common issues:
+```bash
+# Check setup and database health
+bd doctor
+
+# Attempt automatic fixes
+bd doctor --fix
+```
+
+### Daemon Management
+```bash
+# Check running daemons
+bd daemons
+
+# Check daemon health
+bd daemons health
+
+# Stop all daemons if experiencing issues
+bd daemons killall
+```
+
 ### Sync Conflicts
 If git conflicts occur in `.beads/` directory:
 ```bash
@@ -389,8 +458,8 @@ go version
 # Verify bd in PATH
 which bd
 
-# Check version
-bd version
+# Check version and ensure it's up to date
+bd version  # Should be v0.21.5 or later for hash IDs
 ```
 
 ### Performance Issues
@@ -407,9 +476,10 @@ bd compact --days 90 --dry-run
 
 ### Common Errors
 
-**"Issue not found"**: Check ID format (should be like `bd-1`, `bd-42`)
+**"Issue not found"**: Check ID format (should be hash-based like `bd-a1b2`, `bd-f14c`)
 **"Dependency cycle detected"**: Use `bd dep cycles` to find circular dependencies
 **"Database not found"**: Run `bd init` in project root
+**"Old ID format detected"**: Run `bd migrate` to upgrade to hash-based IDs
 
 ## References
 
