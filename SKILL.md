@@ -11,12 +11,14 @@ Beads is a lightweight, git-backed issue tracking system that provides persisten
 
 **BEFORE doing ANY beads operations, you MUST:**
 
-1. Check if beads is initialized in the current project:
-   ```bash
-   test -d .beads && echo "initialized" || echo "not initialized"
+1. Check if beads is initialized in the current project using the Glob tool:
+   ```
+   Glob pattern=".beads"
    ```
 
-2. If the output is "not initialized", you MUST immediately run:
+   If the .beads directory is found in the results, beads is initialized.
+
+2. If .beads is not found, you MUST immediately run:
    ```
    /beads:init
    ```
@@ -339,15 +341,19 @@ All commands support `--json` flag:
 ## Agent Integration Patterns
 
 ### Session Initialization
-```bash
-# Check if Beads is initialized
-if [ -d ".beads" ]; then
-    echo "Beads memory available"
-    bd ready --json --limit 10
-else
-    echo "No Beads database found. Run 'bd init' to initialize."
-fi
+When starting a session, check if Beads is initialized using the Glob tool:
+
 ```
+Glob pattern=".beads"
+```
+
+If the .beads directory is found:
+- Beads memory is available
+- Run `bd ready --json --limit 10` to see available work
+
+If not found:
+- No Beads database exists
+- Run `/beads:init` to initialize
 
 ### Auto-Filing Discovered Work
 ```bash

@@ -7,10 +7,12 @@ Initialize Beads issue tracker in the current project and configure Claude Code 
 
 Follow these steps:
 
-1. Check if .beads directory already exists:
-   ```bash
-   test -d .beads && echo "exists" || echo "not found"
+1. Check if .beads directory already exists using the Glob tool:
    ```
+   Glob pattern=".beads"
+   ```
+
+   If the .beads directory is found in the results, it exists.
 
 2. If not found, initialize beads:
    ```bash
