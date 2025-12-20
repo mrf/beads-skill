@@ -1,6 +1,13 @@
 ---
 name: beads
 description: Work with Beads issue tracker for AI agent memory. Use when managing tasks, tracking dependencies, filing issues, or maintaining context across coding sessions. Handles bd commands, issue graphs, and persistent agent memory.
+license: MIT
+compatibility: Requires beads CLI (bd) v0.21.5+ in PATH. Git repository required for issue storage.
+metadata:
+  version: "0.21.5"
+  author: Mark Ferree
+  repository: https://github.com/mrf/beads-skill
+  skill-author: Mark Ferree
 ---
 
 # Beads: Memory System for Coding Agents
