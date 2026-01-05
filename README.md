@@ -1,8 +1,8 @@
 # Beads Skill for Claude Code
 
-This skill enables Claude Code to work effectively with [Beads](https://github.com/steveyegge/beads), a lightweight git-backed issue tracker that provides persistent memory for AI coding agents.
+This was an early experiment and you will probably have a lot better experience using the [official Beads Claude plugin](https://github.com/steveyegge/beads/blob/main/docs/PLUGIN.md)
 
-**Latest Beads Version:** v0.21.5 (November 2025)
+This skill enables Claude Code to work effectively with [Beads](https://github.com/steveyegge/beads), a lightweight git-backed issue tracker that provides persistent memory for AI coding agents.
 
 ## What Is This?
 
